@@ -533,15 +533,19 @@
         const container = document.getElementById("pageContainer");
         const filename = `ตารางประชุม_${document.getElementById("datePicker").value}.jpg`;
         const btn = document.querySelector(".btn-capture");
+
+        // 1. ดึง Element ของ Timestamp มาใช้งาน
+        const tsElement = document.getElementById("printTimestamp");
         const originalText = btn.innerHTML;
 
         btn.innerHTML = "⏳ กำลังบันทึก...";
         btn.disabled = true;
 
-        // 1. โชว์ Timestamp ก่อนแคปเจอร์หน้าจอ
+        // 2. โชว์ Timestamp ก่อนแคปเจอร์หน้าจอ
         tsElement.innerText = getCurrentTimestamp();
         tsElement.style.display = "block";
 
+        // ใช้ setTimeout หน่วงเวลา (เช่น 300ms) เพื่อให้เบราว์เซอร์เรนเดอร์ตัวอักษรบนจอให้เสร็จก่อนถ่ายรูป
         setTimeout(() => {
           html2canvas(container, {
             scale: 2,
@@ -555,11 +559,18 @@
               link.download = filename;
               link.href = canvas.toDataURL("image/jpeg", 0.9);
               link.click();
+
+              // 3. เซฟเสร็จแล้ว ซ่อน Timestamp กลับ และคืนค่าปุ่ม
+              tsElement.style.display = "none";
               btn.innerHTML = originalText;
               btn.disabled = false;
             })
             .catch((err) => {
-              alert(`เกิดข้อผิดพลาดในการบันทึกภาพ ` + err.message);
+              alert("เกิดข้อผิดพลาดในการบันทึกภาพ => " + err.massage);
+              console.error(err);
+
+              // กรณี Error ก็ต้องซ่อน Timestamp กลับด้วย
+              tsElement.style.display = "none";
               btn.innerHTML = originalText;
               btn.disabled = false;
             });
