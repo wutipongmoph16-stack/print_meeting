@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>สรุปการใช้ห้องประชุม</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style id="printPageStyle">
+      @page {
+        size: A4 portrait;
+        margin: 0; /* ลบ margin กระดาษออก เพื่อให้ CSS ของเราจัดการขอบเอง */
+      }
+    </style>
+
+    <style>
+      /* ตั้งค่าทั่วไป */
+      body {
+        font-family: "Sarabun", sans-serif;
+        font-size: 14pt;
+        color: #333;
+        background-color: #e9ecef;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* ส่วนควบคุมด้านบน */
+      .controls {
+        background: #fff;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center; /* จัดให้อุปกรณ์อยู่กึ่งกลางแถบ */
+        flex-wrap: wrap;
+        gap: 15px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* .controls.landscape-mode {
+        max-width: 29.7cm;
+      } */
+
+      .controls input[type="date"],
+      .controls select {
+        font-family: "Sarabun", sans-serif;
+        font-size: 14pt;
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        outline: none;
+      }
+
+      .controls button {
+        font-family: "Sarabun", sans-serif;
+        font-size: 14pt;
+        padding: 6px 15px;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .btn-print {
+        background-color: #007bff;
+      }
+      .btn-print:hover {
+        background-color: #0056b3;
+      }
+      .btn-capture {
+        background-color: #28a745;
+      }
+      .btn-capture:hover {
+        background-color: #218838;
+      }
+
+      /* กรอบจำลองกระดาษ A4 (บังคับขนาดตายตัว) */
+      .page-container {
+        background: #fff;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        /* ขนาด A4 แนวตั้ง */
+        width: 21cm;
+        height: 29.7cm;
+        position: relative;
+        overflow: hidden; /* ซ่อนส่วนที่ล้น (กัน layout พัง) */
+        box-sizing: border-box;
+      }
+
+      /* ขนาด A4 แนวนอน */
+      .page-container.landscape-mode {
+        width: 29.7cm;
+        height: 21cm;
+      }
+
+      /* แรปเปอร์สำหรับเนื้อหาข้างใน (จะถูกสเกลย่ออัตโนมัติถ้าล้น) */
+      .page-content {
+        padding: 1.5cm 2cm; /* ขอบกระดาษ */
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        transform-origin: top left; /* จุดอ้างอิงตอนย่อส่วน */
+      }
+
+      /* ส่วนหัวกระดาษ */
+      .document-header {
+        text-align: center;
+        margin-bottom: 15px;
+      }
+
+      .document-header img.logo {
+        width: 75px;
+        height: auto;
+        margin-bottom: 5px;
+      }
+
+      .document-header .office-name {
+        font-size: 16pt;
+        font-weight: 600;
+        line-height: 1.3;
+        margin-bottom: 5px;
+      }
+
+      .document-header .header-title {
+        font-size: 15pt;
+        font-weight: 600;
+      }
+
+      /* พื้นที่ตาราง (ดันส่วน Footer ลงไปด้านล่างเสมอ) */
+      #tableContainer {
+        flex-grow: 1;
+        margin-bottom: 15px;
+      }
+
+      /* ตาราง */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 6px 8px;
+        vertical-align: top;
+        font-size: 13pt; /* ลดขนาดฟอนต์ตารางลงเล็กน้อยให้อ่านง่าย */
+      }
+      th {
+        background-color: #f2f2f2;
+        font-weight: 600;
+        text-align: center;
+        font-size: 14pt;
+      }
+      .text-center {
+        text-align: center;
+      }
+      .text-small {
+        font-size: 11pt;
+        color: #444;
+      }
+
+      /* ส่วนท้ายกระดาษ (หมายเหตุ + Line OA) */
+      .page-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding-top: 15px;
+        border-top: 1px dashed #ccc; /* เส้นประคั่นตาราง */
+        page-break-inside: avoid;
+      }
+
+      .remarks {
+        width: 65%;
+        font-size: 13pt;
+        line-height: 1.5;
+      }
+
+      .line-oa-footer {
+        width: 30%;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .line-oa-footer .qr-code {
+        width: 75px;
+        height: auto;
+        border: 1px solid #ddd;
+        padding: 5px;
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .line-oa-footer .line-text {
+        font-size: 11pt;
+        line-height: 1.3;
+      }
+
+      /* การตั้งค่าสำหรับการพิมพ์จริง */
+      @media print {
+        body {
+          background-color: #fff;
+          padding: 0;
+          margin: 0;
+          display: block;
+        }
+        .controls {
+          display: none;
+        }
+        .page-container {
+          box-shadow: none;
+          margin: 0;
+          /* บังคับให้ขนาดอิงตาม A4 เสมอเวลาพิมพ์ */
+          width: 21cm !important;
+          height: 29.7cm !important;
+          page-break-after: avoid;
+        }
+        .page-container.landscape-mode {
+          width: 29.7cm !important;
+          height: 21cm !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="controls" id="controlsBar">
+      <label for="datePicker"><strong>เลือกวันที่:</strong></label>
+      <input type="date" id="datePicker" />
+
+      <label for="orientationSelect"><strong>รูปแบบหน้า:</strong></label>
+      <select id="orientationSelect">
+        <option value="portrait">แนวตั้ง (Portrait)</option>
+        <option value="landscape">แนวนอน (Landscape)</option>
+      </select>
+
+      <button class="btn-print" onclick="window.print()">🖨️ พิมพ์เอกสาร</button>
+      <button class="btn-capture" onclick="captureToJPG()">
+        📸 บันทึกเป็น JPG
+      </button>
+    </div>
+
+    <div class="page-container" id="pageContainer">
+      <div class="page-content" id="pageContent">
+        <div class="document-header">
+          <img src="image/Logo-MOPH.png" alt="โลโก้ สธ" class="logo" />
+          <div class="office-name">
+            สำนักงานสาธารณสุขจังหวัดลพบุรี<br />
+            Lopburi Provincial Public Health Office
+          </div>
+          <div class="header-title">
+            สรุปการใช้ห้องประชุมประจำ<span id="displayDateText"></span>
+          </div>
+        </div>
+
+        <div id="tableContainer">กำลังโหลดข้อมูล...</div>
+
+        <div class="page-footer">
+          <div class="remarks">
+            <strong>หมายเหตุ :</strong><br />
+            1. หากมีการเปลี่ยนแปลงหรือยกเลิกการใช้งาน โปรดแจ้งให้ทราบล่วงหน้า<br />
+            2. งานสื่อสารฯ จะดำเนินการเปิดระบบภาพและเสียงก่อนเวลาที่ท่านจองไว้
+            15 นาที<br />
+            3. ติดต่อผู้รับผิดชอบ คุณวุฒิพงษ์ 061-197-9416 Line ID: march3696,
+            วันเฉลิม 093-051-5794
+          </div>
+
+          <div class="line-oa-footer">
+            <!-- src="M_gainfriends_2dbarcodes_BW.png" -->
+            <img
+              src="image/M_gainfriends_2dbarcodes_BW.png"
+              alt="Line QR Code"
+              class="qr-code"
+            />
+            <div class="line-text">
+              <strong>ติดต่อแอดมินห้องประชุม</strong><br />
+              Line OA “น้องโสตฯ สสจ.ลพบุรี”
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.addEventListener("load", autoFitContent);
+      document.addEventListener("DOMContentLoaded", () => {
+        const datePicker = document.getElementById("datePicker");
+        const orientationSelect = document.getElementById("orientationSelect");
+        const printPageStyle = document.getElementById("printPageStyle");
+        const pageContainer = document.getElementById("pageContainer");
+        const controlsBar = document.getElementById("controlsBar");
+
+        // ตั้งค่า Datepicker
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const dd = String(today.getDate()).padStart(2, "0");
+        datePicker.value = `${yyyy}-${mm}-${dd}`;
+
+        fetchData(datePicker.value);
+
+        datePicker.addEventListener("change", (e) => fetchData(e.target.value));
+
+        // เปลี่ยนรูปแบบกระดาษ
+        orientationSelect.addEventListener("change", (e) => {
+          const mode = e.target.value;
+          if (mode === "landscape") {
+            printPageStyle.innerHTML =
+              "@page { size: A4 landscape; margin: 0; }";
+            pageContainer.classList.add("landscape-mode");
+            controlsBar.classList.add("landscape-mode");
+          } else {
+            printPageStyle.innerHTML =
+              "@page { size: A4 portrait; margin: 0; }";
+            pageContainer.classList.remove("landscape-mode");
+            controlsBar.classList.remove("landscape-mode");
+          }
+          // สั่งคำนวณการย่อขนาดใหม่ทุกครั้งที่สลับหน้า
+          setTimeout(autoFitContent, 100);
+        });
+      });
+
+      // ฟังก์ชันบีบอัดหน้ากระดาษให้พอดีกับ A4 เสมอ (Auto-Fit)
+      function autoFitContent() {
+        const container = document.getElementById("pageContainer");
+        const content = document.getElementById("pageContent");
+
+        // 1. รีเซ็ตค่า Scale เดิมออกก่อนเพื่อวัดขนาดจริง
+        content.style.transform = "none";
+        content.style.width = "100%";
+        content.style.height = "auto";
+
+        // 2. วัดความสูง
+        const containerHeight = container.clientHeight;
+        const contentHeight = content.scrollHeight;
+
+        // 3. ถ้าเนื้อหาสูงกว่าหน้า A4 ให้ย่อ (Scale down)
+        if (contentHeight > containerHeight) {
+          const scale = containerHeight / contentHeight;
+          content.style.transform = `scale(${scale})`;
+          // ขยายความกว้างชดเชยเพื่อให้เนื้อหาเต็มขอบซ้ายขวาเหมือนเดิม
+          content.style.width = `${100 / scale}%`;
+          content.style.height = `${100 / scale}%`;
+        } else {
+          // ถ้าไม่ล้น ให้ยืดความสูงเต็มหน้า เพื่อดัน Footer ลงไปขอบล่าง
+          content.style.height = "100%";
+        }
+      }
+
+      // จัดรูปแบบเบอร์โทรศัพท์
+      function formatPhoneNumber(tel) {
+        if (!tel) return "";
+        let parts = tel.split(/ต่อ|ext/i);
+        let mainNumber = parts[0].replace(/\D/g, "");
+        let extNumber = parts.length > 1 ? parts[1].trim() : "";
+        let formattedNumber = mainNumber;
+
+        if (mainNumber.length === 10)
+          formattedNumber = mainNumber.replace(
+            /(\d{3})(\d{3})(\d{4})/,
+            "$1-$2-$3",
+          );
+        else if (mainNumber.length === 9)
+          formattedNumber = mainNumber.replace(
+            /(\d{3})(\d{3})(\d{3})/,
+            "$1-$2-$3",
+          );
+        else if (mainNumber.length > 0) formattedNumber = parts[0].trim();
+        else return tel;
+
+        if (extNumber) return `${formattedNumber} ต่อ ${extNumber}`;
+        return formattedNumber;
+      }
+
+      function formatApiDate(dateString) {
+        if (!dateString) return "";
+        const parts = dateString.split("-");
+        return `${parts[2]}/${parts[1]}/${parseInt(parts[0]) + 543}`;
+      }
+
+      function formatDisplayDate(dateString) {
+        if (!dateString) return "";
+        const days = [
+          "อาทิตย์",
+          "จันทร์",
+          "อังคาร",
+          "พุธ",
+          "พฤหัสบดี",
+          "ศุกร์",
+          "เสาร์",
+        ];
+        const months = [
+          "มกราคม",
+          "กุมภาพันธ์",
+          "มีนาคม",
+          "เมษายน",
+          "พฤษภาคม",
+          "มิถุนายน",
+          "กรกฎาคม",
+          "สิงหาคม",
+          "กันยายน",
+          "ตุลาคม",
+          "พฤศจิกายน",
+          "ธันวาคม",
+        ];
+        const dateObj = new Date(dateString);
+        return `วัน ${days[dateObj.getDay()]} ที่ ${dateObj.getDate()} เดือน ${months[dateObj.getMonth()]} พ.ศ. ${dateObj.getFullYear() + 543}`;
+      }
+
+      async function fetchData(dateString) {
+        document.getElementById("displayDateText").innerText =
+          formatDisplayDate(dateString);
+        document.getElementById("tableContainer").innerHTML =
+          "กำลังโหลดข้อมูล...";
+
+        try {
+          const response = await fetch(
+            `https://lbmoph.thaismartoffice.com/smo/api/smoapi/CheckMeetingRooms?date=${formatApiDate(dateString)}`,
+          );
+          const data = await response.json();
+          renderTable(data);
+        } catch (error) {
+          document.getElementById("tableContainer").innerHTML =
+            `<p style="color:red; text-align:center;">ไม่สามารถดึงข้อมูลได้</p>`;
+        }
+      }
+
+      function renderTable(data) {
+        if (!data || data.length === 0) {
+          document.getElementById("tableContainer").innerHTML =
+            "<p style='text-align:center; padding-top: 20px;'>ไม่พบข้อมูลการจองห้องประชุมในวันนี้</p>";
+          autoFitContent(); // จัดหน้าใหม่
+          return;
+        }
+
+        let html = `<table><thead><tr>
+                            <th width="25%">ห้องประชุม</th>
+                            <th width="12%">เวลา</th>
+                            <th width="45%">หัวข้อการประชุม</th>
+                            <th width="18%">ผู้จอง</th>
+                        </tr></thead><tbody>`;
+
+        data.forEach((room) => {
+          const meetings = room.meetings;
+          if (meetings && meetings.length > 0) {
+            meetings.forEach((m, index) => {
+              html += `<tr>`;
+              if (index === 0)
+                html += `<td rowspan="${meetings.length}"><strong>${room.roomName}</strong></td>`;
+
+              let timeDisplay =
+                m.startDate && m.endDate
+                  ? `${m.startDate.split(" ")[1] || ""} - ${m.endDate.split(" ")[1] || ""}`
+                  : "-";
+              html += `<td class="text-center">${timeDisplay}</td><td>${m.text || "-"}</td>`;
+
+              let userDisplay = m.user || "-";
+              if (m.user && m.tel)
+                userDisplay += `<br><span class="text-small">(โทร. ${formatPhoneNumber(m.tel)})</span>`;
+
+              html += `<td>${userDisplay}</td></tr>`;
+            });
+          }
+        });
+
+        html += `</tbody></table>`;
+        document.getElementById("tableContainer").innerHTML = html;
+
+        // หน่วงเวลาเล็กน้อยให้ตารางเรนเดอร์เสร็จแล้วค่อยคำนวณขนาด
+        setTimeout(autoFitContent, 50);
+      }
+
+      function captureToJPG() {
+        const container = document.getElementById("pageContainer");
+        const filename = `ตารางประชุม_${document.getElementById("datePicker").value}.jpg`;
+        const btn = document.querySelector(".btn-capture");
+        const originalText = btn.innerHTML;
+
+        btn.innerHTML = "⏳ กำลังบันทึก...";
+        btn.disabled = true;
+
+        setTimeout(() => {
+          html2canvas(container, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            width: container.offsetWidth,
+            height: container.offsetHeight,
+          })
+            .then((canvas) => {
+              const link = document.createElement("a");
+              link.download = filename;
+              link.href = canvas.toDataURL("image/jpeg", 0.9);
+              link.click();
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+            })
+            .catch((err) => {
+              alert(`เกิดข้อผิดพลาดในการบันทึกภาพ ` + err.message);
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+            });
+        }, 300);
+      }
+    </script>
+  </body>
+</html>
