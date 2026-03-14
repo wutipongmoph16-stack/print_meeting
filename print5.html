@@ -147,11 +147,37 @@
         color: #555;
       }
 
-      /* ส่วนหมายเหตุ */
+      /* ส่วนหมายเหตุ (จัดวางใหม่ไว้ที่มุมซ้ายล่าง) */
       .remarks {
-        margin-top: 30px;
         font-size: 14pt;
         line-height: 1.6;
+        position: absolute;
+        bottom: 2cm;
+        left: 2cm;
+        width: 60%; /* ให้มีพื้นที่ส่วนใหญ่บนด้านซ้าย */
+      }
+
+      /* ส่วน LINE OA (จัดวางไว้ที่มุมขวาล่าง) */
+      .line-oa-footer {
+        position: absolute;
+        bottom: 2cm;
+        right: 2cm;
+        width: 30%; /* ให้มีพื้นที่ส่วนที่เหลือบนด้านขวา */
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .line-oa-footer .qr-code {
+        width: 100px; /* ขนาดของ QR code */
+        height: auto;
+      }
+
+      .line-oa-footer .line-text {
+        font-size: 12pt;
+        line-height: 1.4;
       }
 
       /* การตั้งค่าสำหรับการพิมพ์ */
@@ -161,14 +187,31 @@
           padding: 0;
         }
         .controls {
-          display: none;
+          display: none; /* ซ่อนปุ่มต่างๆ */
         }
         .page-container {
           padding: 0;
           box-shadow: none;
-          max-width: none !important;
+          width: none !important; /* ปล่อยให้เบราว์เซอร์จัดการขนาด A4 เอง */
+          height: none !important;
           margin: 0;
-          min-height: auto !important;
+        }
+        /* จัดการตำแหน่งเพื่อพิมพ์ลง A4 ได้พอดี */
+        .remarks,
+        .line-oa-footer {
+          position: absolute;
+          bottom: 2.5cm;
+        }
+        .remarks {
+          left: 1.5cm;
+          width: 60%;
+        }
+        .line-oa-footer {
+          right: 1.5cm;
+          width: 30%;
+        }
+        .line-oa-footer .qr-code {
+          width: 120px;
         }
       }
     </style>
@@ -193,7 +236,7 @@
     <div class="page-container" id="pageContainer">
       <div class="document-header">
         <img
-          src="https://www.mhc11.go.th/wp-content/uploads/2023/08/Logo-MOPH.png"
+          src="https://github.com/wutipongmoph16-stack/print_meeting/blob/main/image/M_gainfriends_2dbarcodes_BW.png"
           alt="โลโก้กระทรวงสาธารณสุข"
           class="logo"
         />
@@ -215,6 +258,19 @@
         นาที<br />
         3. ติดต่อผู้รับผิดชอบ คุณวุฒิพงษ์ 061-197-9416 Line ID : march3696 ,
         คุณวันเฉลิม 093-051-5794
+      </div>
+
+      <div class="line-oa-footer">
+        <img
+          src="D:\LBMoph\งานโปรแกรมมิ่ง\digital signate\image\M_gainfriends_2dbarcodes_BW.png"
+          alt="Line QR Code น้องโสตฯ"
+          class="qr-code"
+          crossorigin="anonymous"
+        />
+        <div class="line-text">
+          <strong>ติดต่อกับแอดมินดูแลห้องประชุม</strong><br />
+          Line OA “น้องโสตฯ สสจ.ลพบุรี”
+        </div>
       </div>
     </div>
 
