@@ -538,6 +538,10 @@
         btn.innerHTML = "⏳ กำลังบันทึก...";
         btn.disabled = true;
 
+        // 1. โชว์ Timestamp ก่อนแคปเจอร์หน้าจอ
+        tsElement.innerText = getCurrentTimestamp();
+        tsElement.style.display = "block";
+
         setTimeout(() => {
           html2canvas(container, {
             scale: 2,
