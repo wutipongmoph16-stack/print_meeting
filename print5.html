@@ -12,7 +12,7 @@
 
     <style id="printPageStyle">
       @page {
-        size: A4 portrait;
+        size: A4 landscape;
         margin: 0; /* ลบ margin กระดาษออก เพื่อให้ CSS ของเราจัดการขอบเอง */
       }
     </style>
@@ -46,10 +46,6 @@
         width: 100%;
         box-sizing: border-box;
       }
-
-      /* .controls.landscape-mode {
-        max-width: 29.7cm;
-      } */
 
       .controls input[type="date"],
       .controls select {
@@ -85,27 +81,27 @@
         background-color: #218838;
       }
 
-      /* กรอบจำลองกระดาษ A4 (บังคับขนาดตายตัว) */
+      /* กรอบจำลองกระดาษ A4 (บังคับขนาดตายตัว) - ค่าเริ่มต้นเป็นแนวนอน (Landscape) */
       .page-container {
         background: #fff;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-        /* ขนาด A4 แนวตั้ง */
-        width: 21cm;
-        height: 29.7cm;
+        /* ขนาด A4 แนวนอน */
+        width: 29.7cm;
+        height: 21cm;
         position: relative;
         overflow: hidden; /* ซ่อนส่วนที่ล้น (กัน layout พัง) */
         box-sizing: border-box;
       }
 
-      /* ขนาด A4 แนวนอน */
-      .page-container.landscape-mode {
-        width: 29.7cm;
-        height: 21cm;
+      /* ขนาด A4 แนวตั้ง (Portrait) */
+      .page-container.portrait-mode {
+        width: 21cm;
+        height: 29.7cm;
       }
 
       /* แรปเปอร์สำหรับเนื้อหาข้างใน (จะถูกสเกลย่ออัตโนมัติถ้าล้น) */
       .page-content {
-        padding: 1.5cm 2cm; /* ขอบกระดาษ */
+        padding: 1cm 1cm; /* ขอบกระดาษ */
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -125,7 +121,7 @@
       }
 
       .document-header .office-name {
-        font-size: 16pt;
+        font-size: 15pt;
         font-weight: 600;
         line-height: 1.3;
         margin-bottom: 5px;
@@ -134,6 +130,7 @@
       .document-header .header-title {
         font-size: 19pt;
         font-weight: 900;
+        font-weight: bold;
       }
 
       /* พื้นที่ตาราง (ดันส่วน Footer ลงไปด้านล่างเสมอ) */
@@ -173,19 +170,19 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
-        padding-top: 15px;
+        padding-top: 5px;
         border-top: 1px dashed #ccc; /* เส้นประคั่นตาราง */
         page-break-inside: avoid;
       }
 
       .remarks {
-        width: 65%;
-        font-size: 13pt;
+        width: 70%;
+        font-size: 15pt;
         line-height: 1.5;
       }
 
       .line-oa-footer {
-        width: 30%;
+        width: 25%;
         text-align: center;
         display: flex;
         flex-direction: column;
@@ -232,14 +229,14 @@
         .page-container {
           box-shadow: none;
           margin: 0;
-          /* บังคับให้ขนาดอิงตาม A4 เสมอเวลาพิมพ์ */
-          width: 21cm !important;
-          height: 29.7cm !important;
-          page-break-after: avoid;
-        }
-        .page-container.landscape-mode {
+          /* บังคับให้ขนาดอิงตาม A4 เสมอเวลาพิมพ์ - แนวนอนเป็นค่าเริ่มต้น */
           width: 29.7cm !important;
           height: 21cm !important;
+          page-break-after: avoid;
+        }
+        .page-container.portrait-mode {
+          width: 21cm !important;
+          height: 29.7cm !important;
         }
       }
     </style>
@@ -251,8 +248,8 @@
 
       <label for="orientationSelect"><strong>รูปแบบหน้า:</strong></label>
       <select id="orientationSelect">
-        <option value="portrait">แนวตั้ง (Portrait)</option>
         <option value="landscape">แนวนอน (Landscape)</option>
+        <option value="portrait">แนวตั้ง (Portrait)</option>
       </select>
 
       <button class="btn-print" onclick="window.print()">🖨️ พิมพ์เอกสาร</button>
@@ -282,12 +279,18 @@
             1. หากมีการเปลี่ยนแปลงหรือยกเลิกการใช้งาน โปรดแจ้งให้ทราบล่วงหน้า<br />
             2. งานสื่อสารฯ จะดำเนินการเปิดระบบภาพและเสียงก่อนเวลาที่ท่านจองไว้
             15 นาที<br />
-            3. ติดต่อผู้รับผิดชอบ คุณวุฒิพงษ์ 061-197-9416 Line ID: march3696,
-            วันเฉลิม 093-051-5794
+            3. ติดต่อผู้รับผิดชอบ:
+            <span style="font-size: 15pt"
+              >คุณโชคชัย, คุณวรษา, คุณวุฒิพงษ์
+              <b>โทร. 036689689 ต่อ 234</b></span
+            ><br />
+            <span style="font-size: 13pt; color: #555"
+              >อีเมล: riskcom.lbmoph@gmail.com | เว็บไซต์:
+              wwwlbo.moph.go.th</span
+            >
           </div>
 
           <div class="line-oa-footer">
-            <!-- src="M_gainfriends_2dbarcodes_BW.png" -->
             <img
               src="image/M_gainfriends_2dbarcodes_BW.png"
               alt="Line QR Code"
@@ -324,19 +327,19 @@
 
         datePicker.addEventListener("change", (e) => fetchData(e.target.value));
 
-        // เปลี่ยนรูปแบบกระดาษ
+        // เปลี่ยนรูปแบบกระดาษ (แนวนอนเป็นค่าเริ่มต้น)
         orientationSelect.addEventListener("change", (e) => {
           const mode = e.target.value;
-          if (mode === "landscape") {
-            printPageStyle.innerHTML =
-              "@page { size: A4 landscape; margin: 0; }";
-            pageContainer.classList.add("landscape-mode");
-            controlsBar.classList.add("landscape-mode");
-          } else {
+          if (mode === "portrait") {
             printPageStyle.innerHTML =
               "@page { size: A4 portrait; margin: 0; }";
-            pageContainer.classList.remove("landscape-mode");
-            controlsBar.classList.remove("landscape-mode");
+            pageContainer.classList.add("portrait-mode");
+            controlsBar.classList.add("portrait-mode");
+          } else {
+            printPageStyle.innerHTML =
+              "@page { size: A4 landscape; margin: 0; }";
+            pageContainer.classList.remove("portrait-mode");
+            controlsBar.classList.remove("portrait-mode");
           }
           // สั่งคำนวณการย่อขนาดใหม่ทุกครั้งที่สลับหน้า
           setTimeout(autoFitContent, 100);
@@ -566,7 +569,7 @@
               btn.disabled = false;
             })
             .catch((err) => {
-              alert("เกิดข้อผิดพลาดในการบันทึกภาพ => " + err.massage);
+              alert("เกิดข้อผิดพลาดในการบันทึกภาพ => " + err.message);
               console.error(err);
 
               // กรณี Error ก็ต้องซ่อน Timestamp กลับด้วย
