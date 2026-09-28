@@ -475,10 +475,24 @@
           "กำลังโหลดข้อมูล...";
 
         try {
+          // const response = await fetch(
+          //   `https://lbmoph.thaismartoffice.com/smo/api/smoapi/CheckMeetingRooms?date=${formatApiDate(dateString)}`,
+          // );
+          // const data = await response.json();
+          // นำ URL ที่คัดลอกมาจาก Google Apps Script มาใส่ตรงนี้
+          const gasProxyUrl =
+            "https://script.google.com/macros/s/AKfycbyeTOCvw8LhvWtqN94V7oSYNds0odUShisvNoJaJfJr_7IFhCp2ljJAp25vrN0GnrTF/exec";
+
+          // ดึงข้อมูลผ่าน Proxy โดยส่งพารามิเตอร์ date ไปด้วย
           const response = await fetch(
-            `https://lbmoph.thaismartoffice.com/smo/api/smoapi/CheckMeetingRooms?date=${formatApiDate(dateString)}`,
+            `${gasProxyUrl}?date=${formatApiDate(dateString)}`,
           );
           const data = await response.json();
+
+          // ตรวจสอบกรณีเกิด Error จากฝั่ง Proxy
+          if (data.error) {
+            throw new Error(data.error);
+          }
           renderTable(data);
         } catch (error) {
           document.getElementById("tableContainer").innerHTML =
